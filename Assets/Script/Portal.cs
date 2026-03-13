@@ -3,7 +3,25 @@ using UnityEngine;
 public class Portal : MonoBehaviour
 {
     public Transform destinationArena;
+    public ArenaModifier destinationModifier;
+
     private bool justTeleported = false;
+    private PortalIcon portalIcon;
+
+    void Start()
+    {
+        portalIcon = GetComponentInChildren<PortalIcon>();
+    }
+
+    public void SetDestinationModifier(ArenaModifier modifier, Sprite iconSprite)
+    {
+        destinationModifier = modifier;
+
+        if (portalIcon != null)
+        {
+            portalIcon.Setup(modifier, iconSprite);
+        }
+    }
 
     private void ResetTeleportFlag()
     {

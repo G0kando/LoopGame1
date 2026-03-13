@@ -115,12 +115,6 @@ public class ArenaManager : MonoBehaviour
             return;
         }
 
-        if (currentArena.transform == null)
-        {
-            Debug.LogError("currentArena.transform is null!");
-            return;
-        }
-
         Debug.Log($"Spawning portal to arena {arenaIndex}");
 
         GameObject portal = Instantiate(portalPrefab);
@@ -143,9 +137,37 @@ public class ArenaManager : MonoBehaviour
         Vector3 arenaPosition = new Vector3(x, 0, z);
         GameObject destinationArena = Instantiate(arenaPrefabs[arenaIndex], arenaPosition, Quaternion.identity);
 
+        // Выбираем случайный модификатор для новой арены
+        ArenaModifier newModifier = GetRandomModifier();
+        Arena destArenaScript = destinationArena.GetComponent<Arena>();
+        if (destArenaScript != null)
+        {
+            destArenaScript.SetModifier(newModifier);
+        }
+
         portalScript.destinationArena = destinationArena.transform;
 
-        Debug.Log($"Portal {arenaIndex} created at {worldPosition} -> arena at {arenaPosition}");
+        // Передаём модификатор в портал
+        ModifierUI modifierUI = FindFirstObjectByType<ModifierUI>();
+        Sprite iconSprite = modifierUI?.GetIconForModifier(newModifier);
+
+        portalScript.SetDestinationModifier(newModifier, iconSprite);
+
+        Debug.Log($"Portal {arenaIndex} created at {worldPosition} -> arena at {arenaPosition} with modifier {newModifier}");
+    }
+
+    private ArenaModifier GetRandomModifier()
+    {
+        ArenaModifier[] allModifiers = (ArenaModifier[])System.Enum.GetValues(typeof(ArenaModifier));
+
+        List<ArenaModifier> availableModifiers = new List<ArenaModifier>();
+        foreach (var mod in allModifiers)
+        {
+            if (mod != ArenaModifier.None)
+                availableModifiers.Add(mod);
+        }
+
+        return availableModifiers[Random.Range(0, availableModifiers.Count)];
     }
 
     void LoadArena(int index)
